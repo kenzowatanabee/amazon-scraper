@@ -1,30 +1,65 @@
-import os, csv, asyncio
+import os, csv, asyncio, argparse
 
 from typing import Dict, List, Any
 
-from config.config import *
-from file_handler import FileHandler
+from config.settings import *
+from utils.file_handler import FileHandler
 
-class AmazonScraper:
-    def __init__(self) -> None:
-        try:
-            print(f"Loading EAN list: {EAN_LIST}")
-            self.ean_list: List = FileHandler.load_eans_from_csv(str(EAN_LIST))
-            
-        except Exception as e:
-            print(f"Error loading EANS: {e}")
+class CLIscraper:
+    @staticmethod
+    def parse_arguments():
+        """
+        Handles CLI input parsing configurations.
+        """
         
-    async def main(self) -> None:
-        if not self.ean_list: 
-            return
-        else:
-            print("Starting Amazon Scraper... \n" + "-" * 40)
+        parser = argparse.ArgumentParser(
+            description="Amazon Web Scraper"
+        )
+        
+        parser.add_argument(
+            "target",
+            choices=["amazon"],
+            help="E-commerce plataform you want to target."
+        )
+        
+        parser.add_argument(
+            "-i", "--input",
+            type=str,
+            default=str(EAN_LIST),
+            help="Path to a custom CSV file containing target EANS."
+        )
+        
+        parser.add_argument(
+            "-c", "--concurrency",
+            type=int,
+            default=5,
+            help="Maximum number of concurrent network connections (Default: 5)."
+        )
+        
+        return parser.parse_args()
+        
+    async def run(self) -> None:
+        args = self.parse_arguments()
         
         os.makedirs(IMAGES_DIR, exist_ok=True)
         
-        semaphore = asyncio.Semaphore(5)
-        tasks = []
-        nested_results = await asyncio.gather(*tasks)
+        print(f"Loading input source: {args.input}")
+        
+        try:
+            ean_list: List[str] = FileHandler.load_eans_from_csv(args.input)
+        except Exception as e:
+            print("Critical Error reading input source: {e}")
+            return
+        
+        if not ean_list:
+            print("EAN List is empty. Task aborted.")
+            return  
+        
+        if args.target == "amazon":
+            from targets.amazon.worker import AmazonScraper
+            
+            engine = AmazonScraper(ean_list=ean_list, max_concurrent=args.concurrency)
+            await engine.main()
         
 if __name__ == "__main__":
-    asyncio.run(AmazonScraper().main())
+    asyncio.run(CLIscraper().run())
