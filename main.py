@@ -1,4 +1,4 @@
-import os, csv, asyncio, argparse
+import os, csv, asyncio, argparse, logging
 
 from typing import Dict, List, Any
 
@@ -13,7 +13,7 @@ class CLIscraper:
         """
         
         parser = argparse.ArgumentParser(
-            description="Amazon Web Scraper"
+            description="EAN Web Scraper"
         )
         
         parser.add_argument(
@@ -59,7 +59,10 @@ class CLIscraper:
             from targets.amazon.worker import AmazonScraper
             
             engine = AmazonScraper(ean_list=ean_list, max_concurrent=args.concurrency)
-            await engine.main()
+            scraped_data = await engine.main()
+            
+            output_path = "data/output/amazon_results.json"
+            FileHandler.save_results_to_json(output_path, scraped_data)
         
 if __name__ == "__main__":
     asyncio.run(CLIscraper().run())

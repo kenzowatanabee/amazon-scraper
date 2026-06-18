@@ -1,5 +1,5 @@
 import os, csv, json
-from typing import List
+from typing import List, Dict, Any
 
 class FileHandler:
     def __init__(self) -> None:
@@ -23,3 +23,23 @@ class FileHandler:
             print(f"Error reading CSV: {e}")
             
         return eans
+    
+    @staticmethod
+    def save_results_to_json(filepath: str, data: List[Dict[str, Any]]) -> None:
+        """
+        Centralized pipeline static method to save scraped datasets.
+        """
+        
+        if not data:
+            print("No data received to save. Skipping file generation.")
+            return
+        try:
+            import os
+            
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            
+            with open(filepath, mode="w", encoding="utf-8") as file:
+                json.dump(data, file, indent=4, ensure_ascii=False)
+            print(f"Successfully saved {len(data)} items to {filepath}")
+        except Exception as e:
+            print(f"Failed to save JSON results: {e}")
