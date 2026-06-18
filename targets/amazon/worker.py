@@ -3,6 +3,8 @@ from typing import List, Dict, Any
 
 from targets.amazon.parser import AmazonParser
 from utils.logger import setup_custom_logger
+from utils.file_handler import FileHandler
+from config.settings import *
 
 from scrapling.fetchers import AsyncFetcher
 
@@ -23,7 +25,7 @@ class AmazonScraper:
     
     async def scrape_worker(self, ean: str) -> Any:
         async with self.semaphore:
-            self.logger.info(f"Tracking amazon for EAN[{ean}]")
+            self.logger.info(f"Tracking Amazon for EAN[{ean}]")
             search_url = f"https://www.amazon.com.br/s?k={urllib.parse.quote_plus(ean)}"
             
             try:
@@ -49,6 +51,7 @@ class AmazonScraper:
                     filename = f"AMZ_{ean}.jpg" 
                     try:
                         img_response = await AsyncFetcher.get(raw_data["img_url"])
+                        await asyncio.to_thread(FileHandler.save_image_to_disk, IMAGES_DIR, filename, img_response.body)
                         raw_data["image_filename"] = filename
                     except Exception:
                         raw_data["image_filename"] = None

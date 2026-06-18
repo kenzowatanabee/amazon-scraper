@@ -43,3 +43,10 @@ class FileHandler:
             print(f"Successfully saved {len(data)} items to {filepath}")
         except Exception as e:
             print(f"Failed to save JSON results: {e}")
+            
+    @staticmethod
+    def save_image_to_disk(folder_path:str, filename: str, image_bytes: bytes) -> None:
+        os.makedirs(folder_path, exist_ok=True)
+        
+        with open(os.path.join(folder_path, filename), "wb") as f:
+            f.write(image_bytes)
