@@ -23,12 +23,13 @@ class AmazonScraper:
     
     async def scrape_worker(self, ean: str) -> Any:
         async with self.semaphore:
+            self.logger.info(f"Tracking amazon for EAN[{ean}]")
             search_url = f"https://www.amazon.com.br/s?k={urllib.parse.quote_plus(ean)}"
             
             try:
                 page = await AsyncFetcher.get(search_url)
                 if self.is_captcha_blocked(page.text) or page.status != 200:
-                    return None
+                    self.logger.error(f"Failed processing processing EAN [{ean}], captcha or connection error.")
                 
                 search_parser = AmazonParser(page)
                 product_link = search_parser.extract_product_link()
