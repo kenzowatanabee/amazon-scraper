@@ -1,7 +1,7 @@
 import os, asyncio, logging, urllib.parse
 from typing import List, Dict, Any
 
-from targets.amazon.parser import AmazonParser
+from core.targets.amazon.parser import AmazonParser
 from utils.logger import setup_custom_logger
 from utils.file_handler import FileHandler
 from config.settings import *

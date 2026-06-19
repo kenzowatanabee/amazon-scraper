@@ -1,7 +1,7 @@
 import os, asyncio, urllib.parse
 from typing import List, Dict, Any
 
-from targets.amazon.parser import AmazonParser
+from core.targets.amazon.parser import AmazonParser
 
 from scrapling.fetchers import StealthyFetcher, AsyncStealthySession
 

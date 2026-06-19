@@ -65,7 +65,7 @@ class CLIscraper:
         
         # fire up the Engine
         if args.target == "amazon":
-            from targets.amazon.worker import AmazonScraper
+            from core.targets.amazon.worker import AmazonScraper
             
             # since args.concurrency defaults to 5, we can override it to 1 for a single item
             concurrency_limit = 1 if args.ean else args.concurrency

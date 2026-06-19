@@ -1,7 +1,7 @@
 import urllib.parse
 from typing import Optional, List, Dict
 from scrapling import Selector
-from targets.amazon.models import AmazonProduct
+from core.targets.amazon.models import AmazonProduct
 
 class AmazonParser:
     def __init__(self, page_selector: Selector) -> None:
