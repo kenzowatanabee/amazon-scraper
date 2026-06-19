@@ -36,7 +36,7 @@ class ColoredFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def setup_custom_logger(name: str, log_file: str = "data/outputs/scraper.log", level=logging.INFO) -> Logger:
+def setup_custom_logger(name: str, log_file: str = "data/logs/scraper.log", level=logging.INFO) -> Logger:
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
     logger = logging.getLogger(name)
