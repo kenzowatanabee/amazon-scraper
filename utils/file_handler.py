@@ -24,6 +24,29 @@ class FileHandler:
             
         return eans
     
+    @classmethod
+    def load_results_from_json(cls, file_path: str) -> List[Dict[str, Any]]:
+        """
+        Reads a structured JSON data array file from the local file system.
+        Used for dashboard data hydration on application startup.
+        """
+        if not os.path.exists(file_path):
+            return []
+
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                
+            if not isinstance(data, list):
+                return []
+                
+            return data
+            
+        except json.JSONDecodeError as e:
+            return []
+        except Exception as e:
+            return []
+    
     @staticmethod
     def save_results_to_json(filepath: str, data: List[Dict[str, Any]]) -> None:
         """
