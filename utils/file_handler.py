@@ -67,6 +67,52 @@ class FileHandler:
         except Exception as e:
             print(f"Failed to save JSON results: {e}")
             
+    @classmethod
+    def append_or_update_json(cls, file_path: str, data: Any) -> None:
+        """
+        Loads existing records from disk, updates any entry with a matching 'ean',
+        or appends it if it's new. Leaves original batch save logic untouched.
+        """
+        try:
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            
+            # 1. Load historical records if the file already exists
+            existing_data = []
+            if os.path.exists(file_path):
+                existing_data = cls.load_results_from_json(file_path)
+
+            # Ensure incoming data is handled uniformly as a list iterable
+            new_records = data if isinstance(data, list) else [data]
+
+            # 2. Run Upsert (Update or Insert) loop
+            for new_item in new_records:
+                new_ean = new_item.get("ean")
+                if not new_ean:
+                    existing_data.append(new_item)
+                    continue
+
+                # Locate if this EAN has been scraped before in this file
+                match_index = None
+                for idx, existing_item in enumerate(existing_data):
+                    if existing_item.get("ean") == new_ean:
+                        match_index = idx
+                        break
+
+                if match_index is not None:
+                    # Update old record attributes with fresh data
+                    existing_data[match_index] = new_item
+                else:
+                    # Append entirely new item to the dataset
+                    existing_data.append(new_item)
+
+
+            # 3. Save the combined data back to disk
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(existing_data, f, indent=4, ensure_ascii=False)
+                
+        except Exception as e:
+            return
+            
     @staticmethod
     def save_image_to_disk(folder_path:str, filename: str, image_bytes: bytes) -> None:
         os.makedirs(folder_path, exist_ok=True)

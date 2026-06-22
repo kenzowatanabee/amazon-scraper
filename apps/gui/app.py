@@ -96,16 +96,19 @@ class AppDashboard(ctk.CTk):
         finally:
             self.async_loop.close()
             self.after(0, lambda: self.controls_panel.set_running_state(False))
-
+            
     async def _execute_engine_logic(self, ean_list: List[str]):
         try:
             engine = AmazonScraper(ean_list=ean_list, max_concurrent=1)
             scraped_data = await engine.main()
             
-            FileHandler.save_results_to_json(self.output_path, scraped_data)
-            logging.info(f"Amazon Data saved successfully to: {self.output_path}")
+            # 🚀 CALL THE NEW APPEND FUNCTION HERE
+            FileHandler.append_or_update_json(self.output_path, scraped_data)
             
-            self.after(0, self._render_ui_updates, scraped_data)
+            # Reload the entire compiled list from disk to feed the gallery
+            full_updated_dataset = FileHandler.load_results_from_json(self.output_path)
+            
+            self.after(0, self._render_ui_updates, full_updated_dataset)
         except Exception as e:
             logging.error(f"Critical fault inside engine loop pipeline: {e}")
 
